@@ -2,6 +2,7 @@
 using System.Configuration;
 using MySql.Data;
 using MySql.Data.MySqlClient;
+using System.IO.Compression;
 
 namespace BackupMySql
 {
@@ -60,7 +61,14 @@ namespace BackupMySql
 											   destinationDirectory, databaseName,
 											   DateTime.Now.ToString("yyyyMMdd-HHmmss"));
 
-			System.IO.File.Move(tempBackupFileName, backupFileName);
+
+            using (ZipArchive zip = ZipFile.Open(string.Format("{0}.zip", backupFileName), ZipArchiveMode.Create))
+            {
+                zip.CreateEntryFromFile(tempBackupFileName, System.IO.Path.GetFileName(backupFileName));
+            }
+
+            System.IO.File.Delete(tempBackupFileName);
+            
 		}
 	}
 }
