@@ -54,9 +54,14 @@ namespace BackupMySql
 
 		static void DoIt(string databaseName,string connectionString, string destinationDirectory, OneDriveForBusinessBackend backend)
 		{
-			
-			var tempBackupfolder = System.IO.Directory.GetCurrentDirectory()+System.IO.Path.DirectorySeparatorChar.ToString();
-			var tempBackupFileName = String.Format("{0}{1}-{2}.sql",
+
+            var tempBackupfolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tmp") + System.IO.Path.DirectorySeparatorChar.ToString();
+            if (!System.IO.Directory.Exists(tempBackupfolder))
+            {
+                System.IO.Directory.CreateDirectory(tempBackupfolder);
+            }
+
+            var tempBackupFileName = String.Format("{0}{1}-{2}.sql",
 				tempBackupfolder, databaseName,
 				DateTime.Now.ToString("yyyyMMdd-HHmmss"));
 
