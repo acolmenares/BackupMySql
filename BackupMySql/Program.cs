@@ -20,15 +20,21 @@ namespace BackupMySql
 			var databaseName = ConfigurationManager.AppSettings["DatabaseNameMonitoreo"];
 			var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringMonitoreo"].ConnectionString;
 			var destinationDirectory = ConfigurationManager.AppSettings["DestinationDirectoryMonitoreo"];
+            
+            var crashPlanFolder = ConfigurationManager.AppSettings["CrashPlanFolder"];
 
-			DoIt(databaseName, connectionString, destinationDirectory, backend);
+            var crashPlanFileNameMonitoreo = ConfigurationManager.AppSettings["CrashPlanFileNameMonitoreo"];
+            var crashPlanFileNameAuditoria = ConfigurationManager.AppSettings["CrashPlanFileNameAuditoria"];
+
+
+            DoIt(databaseName, connectionString, destinationDirectory, backend, crashPlanFolder, crashPlanFileNameMonitoreo);
 			Console.WriteLine("{0} completed ", databaseName);
 
 			databaseName = ConfigurationManager.AppSettings["DatabaseNameAuditoria"];
 			connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringAuditoria"].ConnectionString;
 			destinationDirectory = ConfigurationManager.AppSettings["DestinationDirectoryAuditoria"];
 
-			DoIt(databaseName, connectionString, destinationDirectory,  backend );
+			DoIt(databaseName, connectionString, destinationDirectory,  backend, crashPlanFolder, crashPlanFileNameAuditoria );
 			Console.WriteLine("{0} completed ", databaseName);
 
 		}
@@ -52,7 +58,7 @@ namespace BackupMySql
 
 
 
-		static void DoIt(string databaseName,string connectionString, string destinationDirectory, OneDriveForBusinessBackend backend)
+		static void DoIt(string databaseName,string connectionString, string destinationDirectory, OneDriveForBusinessBackend backend, string crashPlanFolder, string crashPlanFileName)
 		{
 
             var tempBackupfolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tmp") + System.IO.Path.DirectorySeparatorChar.ToString();
@@ -112,7 +118,20 @@ namespace BackupMySql
                 Console.WriteLine(ex.Message);
             }
 
-            //
+            var crashPlanFileZip = String.Format("{0}{1}-{2}.sql.zip",
+                                              crashPlanFolder, crashPlanFileName,
+                                              DateTime.Now.ToString("yyyyMM"));
+
+            try
+            {
+                Console.WriteLine("copiando  el zip file {0} :  {1} ", tmpZipfile, crashPlanFileZip);
+                System.IO.File.Copy(tmpZipfile, crashPlanFileZip, overwrite:true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
 
             var backupFileName = String.Format("{0}{1}-{2}.sql",
                                               destinationDirectory, databaseName,
